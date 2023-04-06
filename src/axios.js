@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const instance = axios.create({ baseURL: 'https://blog-backend-lac.vercel.app' });
+const instance = axios.create({ baseURL: 'https://blog-backend-3hjc.onrender.com' });
 
 instance.interceptors.request.use((config) => {
   config.headers.Authorization = window.localStorage.getItem('token');

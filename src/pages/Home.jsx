@@ -36,7 +36,9 @@ export const Home = () => {
               <Post
                 id={obj._id}
                 title={obj.title}
-                imageUrl={obj.imageUrl ? `https://blog-backend-lac.vercel.app${obj.imageUrl}` : ''}
+                imageUrl={
+                  obj.imageUrl ? `https://blog-backend-3hjc.onrender.com${obj.imageUrl}` : ''
+                }
                 user={obj.user}
                 createdAt={obj.createdAt}
                 viewsCount={obj.viewsCount}

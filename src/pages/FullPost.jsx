@@ -33,7 +33,7 @@ export const FullPost = () => {
       <Post
         id={data._id}
         title={data.title}
-        imageUrl={data.imageUrl ? `https://blog-backend-lac.vercel.app${data.imageUrl}` : ''}
+        imageUrl={data.imageUrl ? `https://blog-backend-3hjc.onrender.com${data.imageUrl}` : ''}
         user={data.user}
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
