@@ -1,20 +1,5 @@
-import axios from '../../axios';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-export const fetchAuth = createAsyncThunk('auth/fetchAuth', async (params) => {
-  const { data } = await axios.post('/auth/login', params);
-  return data;
-});
-
-export const fetchRegister = createAsyncThunk('auth/fetchRegister', async (params) => {
-  const { data } = await axios.post('/auth/register', params);
-  return data;
-});
-
-export const fetchAuthMe = createAsyncThunk('auth/fetchAuthMe', async () => {
-  const { data } = await axios.get('/auth/me');
-  return data;
-});
+import { createSlice } from '@reduxjs/toolkit';
+import { fetchAuth, fetchAuthMe, fetchRegister } from '../actions/auth';
 
 const initialState = {
   data: null,
@@ -30,6 +15,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers: {
+    // Login
     [fetchAuth.pending]: (state) => {
       state.data = null;
       state.status = 'loading';
@@ -42,18 +28,8 @@ const authSlice = createSlice({
       state.data = null;
       state.status = 'error';
     },
-    [fetchRegister.pending]: (state) => {
-      state.data = null;
-      state.status = 'loading';
-    },
-    [fetchRegister.fulfilled]: (state, action) => {
-      state.data = action.payload;
-      state.status = 'loaded';
-    },
-    [fetchRegister.rejected]: (state) => {
-      state.data = null;
-      state.status = 'error';
-    },
+
+    // Authorization check
     [fetchAuthMe.pending]: (state) => {
       state.data = null;
       state.status = 'loading';
@@ -63,6 +39,20 @@ const authSlice = createSlice({
       state.status = 'loaded';
     },
     [fetchAuthMe.rejected]: (state) => {
+      state.data = null;
+      state.status = 'error';
+    },
+
+    // Register
+    [fetchRegister.pending]: (state) => {
+      state.data = null;
+      state.status = 'loading';
+    },
+    [fetchRegister.fulfilled]: (state, action) => {
+      state.data = action.payload;
+      state.status = 'loaded';
+    },
+    [fetchRegister.rejected]: (state) => {
       state.data = null;
       state.status = 'error';
     },

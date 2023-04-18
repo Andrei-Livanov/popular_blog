@@ -2,34 +2,34 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useParams } from 'react-router-dom';
 
-import { Post, Index, CommentsBlock } from '../components';
-import axios from '../axios';
+import Grid from '@mui/material/Grid';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { selectIsAuth } from '../redux/slices/authSlice';
+import { Post, AddComment, CommentsBlock } from '../components';
+import { fetchCommentsById, fetchPostById } from '../redux/actions/posts';
 
 export const FullPost = () => {
-  const [data, setData] = React.useState();
-  const [isLoading, setLoading] = React.useState(true);
+  const dispatch = useDispatch();
+  const { data, status, comments } = useSelector((state) => state.posts.currentPost);
+  const isAuth = useSelector(selectIsAuth);
+
+  const isDataLoading = status === 'loading';
+  const isCommentsLoading = comments.status === 'loading';
 
   const { id } = useParams();
 
   React.useEffect(() => {
-    axios
-      .get(`/posts/${id}`)
-      .then((res) => {
-        setData(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.warn(err);
-        alert('Ошибка при получении статьи');
-      });
+    dispatch(fetchPostById(id));
+    dispatch(fetchCommentsById(id));
   }, []);
 
-  if (isLoading) {
-    return <Post isLoading={isLoading} isFullPost />;
+  if (isDataLoading || isCommentsLoading) {
+    return <Post isLoading={true} isFullPost />;
   }
 
   return (
-    <>
+    <Grid xs={12} md={8} item>
       <Post
         id={data._id}
         title={data.title}
@@ -37,33 +37,17 @@ export const FullPost = () => {
         user={data.user}
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
-        commentsCount={3}
+        commentsCount={comments.items.length}
         tags={data.tags}
         isFullPost
       >
-        <ReactMarkdown children={data.text} />
+        <div>
+          <ReactMarkdown children={data.text} />
+        </div>
       </Post>
-      <CommentsBlock
-        items={[
-          {
-            user: {
-              fullName: 'Вася Пупкин',
-              avatarUrl: 'https://mui.com/static/images/avatar/1.jpg',
-            },
-            text: 'Это тестовый комментарий 555555',
-          },
-          {
-            user: {
-              fullName: 'Иван Иванов',
-              avatarUrl: 'https://mui.com/static/images/avatar/2.jpg',
-            },
-            text: 'When displaying three lines or more, the avatar is not aligned at the top. You should set the prop to align the avatar at the top',
-          },
-        ]}
-        isLoading={false}
-      >
-        <Index />
+      <CommentsBlock items={comments.items} isLoading={isCommentsLoading} isFullComment>
+        {isAuth ? <AddComment /> : null}
       </CommentsBlock>
-    </>
+    </Grid>
   );
 };

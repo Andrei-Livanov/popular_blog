@@ -9,7 +9,8 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
-import { fetchAuth, selectIsAuth } from '../../redux/slices/auth';
+import { fetchAuth } from '../../redux/actions/auth';
+import { selectIsAuth } from '../../redux/slices/authSlice';
 
 export const Login = () => {
   const dispatch = useDispatch();
@@ -21,8 +22,8 @@ export const Login = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      email: 'test@test.ru',
-      password: '123',
+      email: '',
+      password: '',
     },
     mode: 'onChange',
   });
@@ -30,8 +31,8 @@ export const Login = () => {
   const onSubmit = async (values) => {
     const data = await dispatch(fetchAuth(values));
 
-    if (!data.payload) {
-      return alert('Не удалось авторизоваться!');
+    if ('error' in data) {
+      return alert(data.payload);
     }
 
     if ('token' in data.payload) {

@@ -1,41 +1,38 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Grid from '@mui/material/Grid';
+import { Typography } from '@mui/material';
 
-import { CommentsBlock, Post, TagsBlock } from '../components';
-import { fetchLastComments, fetchPosts, fetchTags } from '../redux/actions/posts';
+import { Post, TagsBlock, CommentsBlock } from '../../components';
+import { fetchTags, fetchPostsWithTag, fetchLastComments } from '../../redux/actions/posts';
 
-export const Home = () => {
+export const PostsWithTag = () => {
   const dispatch = useDispatch();
+  const { tag } = useParams();
   const userData = useSelector((state) => state.auth.data);
   const { posts, tags, comments } = useSelector((state) => state.posts);
-  const [sortedBy, setSortedBy] = React.useState('latest');
 
   const isPostsLoading = posts.status === 'loading';
   const isTagsLoading = tags.status === 'loading';
   const isCommentsLoading = comments.status === 'loading';
 
   React.useEffect(() => {
-    dispatch(fetchPosts(sortedBy));
+    dispatch(fetchPostsWithTag(tag));
     dispatch(fetchTags());
     dispatch(fetchLastComments());
-  }, [sortedBy]);
+  }, [tag]);
 
   return (
     <>
-      <Tabs
-        style={{ marginBottom: 15 }}
-        value={sortedBy === 'latest' ? 0 : 1}
-        aria-label="Сортировка статей"
-      >
-        <Tab label="Новые" onClick={() => setSortedBy('latest')} />
-        <Tab label="Популярные" onClick={() => setSortedBy('views')} />
-      </Tabs>
       <Grid container spacing={4}>
-        <Grid xs={12} md={8} item>
+        <Grid xs={8} item>
+          <Typography variant="h2" component="h1">
+            # {tag}
+          </Typography>
+        </Grid>
+        <Grid xs={8} item>
           {(isPostsLoading ? [...Array(5)] : posts.items).map((post, index) =>
             isPostsLoading ? (
               <Post key={index} isLoading={true} />
@@ -47,7 +44,7 @@ export const Home = () => {
                 user={post.user}
                 createdAt={post.createdAt}
                 viewsCount={post.viewsCount}
-                commentsCount={post.commentsCount.length}
+                commentsCount={3}
                 tags={post.tags}
                 isEditable={userData?._id === post.user._id}
                 key={`homePost-${index}`}
@@ -55,7 +52,7 @@ export const Home = () => {
             )
           )}
         </Grid>
-        <Grid xs={4} item sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Grid xs={4} item>
           <TagsBlock items={tags.items} isLoading={isTagsLoading} />
           <CommentsBlock items={comments.items} isLoading={isCommentsLoading} />
         </Grid>

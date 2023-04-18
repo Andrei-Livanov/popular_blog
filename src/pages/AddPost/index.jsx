@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import SimpleMDE from 'react-simplemde-editor';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
@@ -11,18 +11,18 @@ import 'easymde/dist/easymde.min.css';
 import styles from './AddPost.module.scss';
 
 import axios from '../../axios';
-import { selectIsAuth } from '../../redux/slices/auth';
+import { selectIsAuth } from '../../redux/slices/authSlice';
 
 export const AddPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isAuth = useSelector(selectIsAuth);
+  const inputFileRef = React.useRef(null);
   const [isLoading, setLoading] = React.useState(false);
   const [title, setTitle] = React.useState('');
   const [tags, setTags] = React.useState('');
   const [text, setText] = React.useState('');
   const [imageUrl, setImageUrl] = React.useState('');
-  const inputFileRef = React.useRef(null);
 
   const isEditing = Boolean(id);
 
@@ -47,7 +47,9 @@ export const AddPost = () => {
     setText(value);
   }, []);
 
-  const onSubmit = async () => {
+  const onSubmit = async (event) => {
+    event.preventDefault();
+
     try {
       setLoading(true);
 
@@ -57,9 +59,9 @@ export const AddPost = () => {
         ? await axios.patch(`/posts/${id}`, fields)
         : await axios.post('/posts', fields);
 
-      const _id = isEditing ? id : data._id;
+      const postId = isEditing ? id : data._id;
 
-      navigate(`/posts/${_id}`);
+      navigate(`/posts/${postId}`);
     } catch (err) {
       console.warn(err);
       alert('Ошибка при создании статьи!');
@@ -74,7 +76,7 @@ export const AddPost = () => {
           setTitle(data.title);
           setText(data.text);
           setImageUrl(data.imageUrl);
-          setTags(data.tags.join(','));
+          setTags(data.tags.join(', '));
         })
         .catch((err) => {
           console.warn(err);
@@ -104,18 +106,28 @@ export const AddPost = () => {
 
   return (
     <Paper style={{ padding: 30 }}>
-      <Button onClick={() => inputFileRef.current.click()} variant="outlined" size="large">
+      <Button
+        className={styles.upload}
+        onClick={() => inputFileRef.current.click()}
+        variant="outlined"
+        size="large"
+      >
         Загрузить превью
       </Button>
       <input ref={inputFileRef} type="file" onChange={handleChangeFile} hidden />
       {imageUrl && (
         <>
-          <Button variant="contained" color="error" onClick={onClickRemoveImage}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onClickRemoveImage}
+            className={styles.delete}
+          >
             Удалить
           </Button>
           <img
             className={styles.image}
-            src={imageUrl ? `${process.env.REACT_APP_API_URL}${imageUrl}` : ''}
+            src={`${process.env.REACT_APP_API_URL}${imageUrl}`}
             alt="Uploaded"
           />
         </>
@@ -133,7 +145,7 @@ export const AddPost = () => {
       <TextField
         classes={{ root: styles.tags }}
         variant="standard"
-        placeholder="Тэги"
+        placeholder="Теги"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
         fullWidth
@@ -143,9 +155,11 @@ export const AddPost = () => {
         <Button onClick={onSubmit} size="large" variant="contained">
           {isEditing ? 'Сохранить' : 'Опубликовать'}
         </Button>
-        <a href="/">
-          <Button size="large">Отмена</Button>
-        </a>
+        <Link to="/" className={styles.reset}>
+          <Button size="large" variant="outlined">
+            Отмена
+          </Button>
+        </Link>
       </div>
     </Paper>
   );

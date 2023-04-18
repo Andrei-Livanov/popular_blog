@@ -10,7 +10,8 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
-import { fetchRegister, selectIsAuth } from '../../redux/slices/auth';
+import { fetchRegister } from '../../redux/actions/auth';
+import { selectIsAuth } from '../../redux/slices/authSlice';
 
 export const Registration = () => {
   const dispatch = useDispatch();
@@ -22,9 +23,10 @@ export const Registration = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      fullName: 'Иван Краснов',
-      email: 'email@test.ru',
-      password: '1234',
+      fullName: '',
+      email: '',
+      password: '',
+      avatarUrl: '',
     },
     mode: 'onChange',
   });
@@ -32,8 +34,8 @@ export const Registration = () => {
   const onSubmit = async (values) => {
     const data = await dispatch(fetchRegister(values));
 
-    if (!data.payload) {
-      return alert('Не удалось зарегистрироваться!');
+    if (`error` in data) {
+      return alert(data.payload);
     }
 
     if ('token' in data.payload) {
@@ -69,6 +71,14 @@ export const Registration = () => {
           helperText={errors.email?.message}
           type="email"
           {...register('email', { required: 'Укажите почту' })}
+          fullWidth
+        />
+        <TextField
+          className={styles.field}
+          error={Boolean(errors.avatarUrl?.message)}
+          helperText={errors.avatarUrl?.message}
+          {...register('avatarUrl')}
+          label="Ссылка на аватарку"
           fullWidth
         />
         <TextField

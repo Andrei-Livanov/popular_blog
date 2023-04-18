@@ -13,7 +13,8 @@ import CommentIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 
 import { UserInfo } from '../UserInfo';
 import { PostSkeleton } from './Skeleton';
-import { fetchRemovePost } from '../../redux/slices/posts';
+import dateConverter from '../../utils/dateConverter';
+import { fetchRemovePost } from '../../redux/actions/posts';
 
 export const Post = ({
   id,
@@ -63,18 +64,20 @@ export const Post = ({
         />
       )}
       <div className={styles.wrapper}>
-        <UserInfo {...user} additionalText={createdAt} />
+        <UserInfo {...user} additionalText={dateConverter(createdAt)} />
         <div className={styles.indention}>
           <h2 className={clsx(styles.title, { [styles.titleFull]: isFullPost })}>
             {isFullPost ? title : <Link to={`/posts/${id}`}>{title}</Link>}
           </h2>
-          <ul className={styles.tags}>
-            {tags.map((name) => (
-              <li key={name}>
-                <Link to={`/tag/${name}`}>#{name}</Link>
-              </li>
-            ))}
-          </ul>
+          {tags.length > 0 && (
+            <ul className={styles.tags}>
+              {tags.map((name) => (
+                <li key={name}>
+                  <Link to={`/tags/${name}`}>#{name}</Link>
+                </li>
+              ))}
+            </ul>
+          )}
           {children && <div className={styles.content}>{children}</div>}
           <ul className={styles.postDetails}>
             <li>

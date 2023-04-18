@@ -1,15 +1,27 @@
-import React from "react";
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { SideBlock } from "./SideBlock";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import Skeleton from "@mui/material/Skeleton";
+import Grid from '@mui/material/Grid';
+import List from '@mui/material/List';
+import Avatar from '@mui/material/Avatar';
+import Divider from '@mui/material/Divider';
+import Skeleton from '@mui/material/Skeleton';
+import ListItem from '@mui/material/ListItem';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
 
-export const CommentsBlock = ({ items, children, isLoading = true }) => {
+import { SideBlock } from './SideBlock';
+import { fetchRemoveComment } from '../redux/actions/posts';
+
+export const CommentsBlock = ({ items, children, isLoading = true, isFullComment = false }) => {
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.auth.data?._id);
+
+  const deleteComment = (commentId) => {
+    dispatch(fetchRemoveComment(commentId));
+  };
+
   return (
     <SideBlock title="Комментарии">
       <List>
@@ -24,15 +36,22 @@ export const CommentsBlock = ({ items, children, isLoading = true }) => {
                 )}
               </ListItemAvatar>
               {isLoading ? (
-                <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <Skeleton variant="text" height={25} width={120} />
                   <Skeleton variant="text" height={18} width={230} />
                 </div>
               ) : (
-                <ListItemText
-                  primary={obj.user.fullName}
-                  secondary={obj.text}
-                />
+                <>
+                  <Grid item container direction="column">
+                    <b>{obj.user.fullName}</b>
+                    <span>{obj.text}</span>
+                  </Grid>
+                  {obj.user._id === userId && isFullComment ? (
+                    <IconButton aria-label="delete" onClick={() => deleteComment(obj._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  ) : null}
+                </>
               )}
             </ListItem>
             <Divider variant="inset" component="li" />
